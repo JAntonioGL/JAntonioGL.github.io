@@ -1,22 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>reCAPTCHA Flutter</title>
-  <meta charset="utf-8">
-  <script src="https://www.google.com/recaptcha/api.js?render=6LfSbIcrAAAAAAbh5FUpshF8xpab_YAjqFsnBpq6"></script>
-  <script>
-    function ejecutarCaptcha() {
-      grecaptcha.ready(function () {
-        grecaptcha.execute('6LfSbIcrAAAAAAbh5FUpshF8xpab_YAjqFsnBpq6', { action: 'login' }).then(function (token) {
-          if (window.flutter_inappwebview) {
-            window.flutter_inappwebview.callHandler('recaptchaHandler', token);
-          }
-        });
-      });
-    }
-  </script>
+    <title>reCAPTCHA v3 Flutter Bridge</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #007bff;
+        }
+        p {
+            margin-top: 15px;
+        }
+    </style>
 </head>
-<body onload="ejecutarCaptcha()">
-  <h3>Ejecutando reCAPTCHA...</h3>
+<body>
+    <div class="container">
+        <h1>reCAPTCHA v3 para Flutter</h1>
+        <p>Esperando la ejecución de reCAPTCHA desde Flutter...</p>
+        <p id="status-message">Estado: Inicializando...</p>
+    </div>
+
+    <script type="text/javascript">
+        // Esta función será llamada desde Flutter para ejecutar reCAPTCHA
+        function executeRecaptcha(siteKey, action) {
+            document.getElementById('status-message').innerText = 'Estado: Ejecutando reCAPTCHA...';
+            // Asegúrate de que grecaptcha esté listo
+            grecaptcha.ready(function() {
+                // Ejecuta reCAPTCHA con la clave de sitio y la acción proporcionadas
+                grecaptcha.execute(siteKey, { action: action }).then(function(token) {
+                    document.getElementById('status-message').innerText = 'Estado: Token recibido. Enviando a Flutter...';
+                    // Envía el token de vuelta a Flutter a través del canal 'Captcha'
+                    if (typeof Captcha !== 'undefined') { // Verifica si el canal de Flutter existe
+                        Captcha.postMessage(token);
+                        document.getElementById('status-message').innerText = 'Estado: Token enviado a Flutter.';
+                    } else {
+                        document.getElementById('status-message').innerText = 'Error: Canal "Captcha" no encontrado en Flutter.';
+                        console.error('El objeto Captcha de Flutter no está definido.');
+                    }
+                }).catch(function(error) {
+                    document.getElementById('status-message').innerText = 'Error reCAPTCHA: ' + error.message;
+                    if (typeof Captcha !== 'undefined') {
+                        Captcha.postMessage('ERROR: ' + error.message);
+                    }
+                    console.error('Error al ejecutar reCAPTCHA:', error);
+                });
+            });
+        }
+
+        // Función opcional para notificar a Flutter cuando el HTML está completamente cargado
+        // y listo para recibir comandos
+        window.onload = function() {
+            document.getElementById('status-message').innerText = 'Estado: HTML cargado y listo para reCAPTCHA.';
+            if (typeof FlutterBridge !== 'undefined') {
+                FlutterBridge.postMessage('HTML_READY');
+            }
+        };
+    </script>
 </body>
 </html>
