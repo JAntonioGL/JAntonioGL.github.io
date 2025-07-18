@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>reCAPTCHA v3 Bridge for Flutter</title>
+    <title>reCAPTCHA v3 Bridge para Flutter (Corregido)</title>
     <!-- Carga la API de reCAPTCHA v3. Es crucial que esté aquí. -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
@@ -75,9 +75,9 @@
     </div>
 
     <script type="text/javascript">
-        // Esta función es crucial. Será llamada por el paquete flutter_gcaptcha_v3.
-        // El nombre de la función 'executeV3' debe coincidir con lo que el paquete espera.
-        function executeV3(siteKey, action) {
+        // ¡CAMBIO CLAVE AQUÍ! El nombre de la función ahora es 'executeCaptcha'
+        // para que coincida con lo que el paquete 'flutter_gcaptcha_v3' espera.
+        window.executeCaptcha = function(siteKey, action) { // Hacemos la función global explícitamente
             document.getElementById('status-message').innerText = 'Estado: Ejecutando reCAPTCHA v3...';
             console.log('reCAPTCHA: Ejecutando con siteKey:', siteKey, 'y acción:', action);
 
@@ -110,18 +110,12 @@
                         }
                     });
             });
-        }
+        };
 
         // Esta función se ejecuta cuando el HTML está completamente cargado.
-        // Puede ser útil para depuración o para notificar a Flutter que el WebView está listo.
         window.onload = function() {
             document.getElementById('status-message').innerText = 'Estado: HTML cargado y listo para recibir comandos.';
             console.log('reCAPTCHA: HTML completamente cargado.');
-            // Si tu paquete de Flutter espera una señal de "listo", podrías enviarla aquí.
-            // Por ejemplo, si tuvieras un canal llamado 'FlutterReadyChannel':
-            // if (typeof FlutterReadyChannel !== 'undefined') {
-            //     FlutterReadyChannel.postMessage('HTML_LOADED');
-            // }
         };
     </script>
 </body>
