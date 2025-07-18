@@ -5,8 +5,10 @@
     <script src="https://www.google.com/recaptcha/api.js?render=6LfSbIcrAAAAAAbh5FUpshF8xpab_YAjqFsnBpq6"></script>
     <script>
       function ejecutar() {
-        grecaptcha.execute('6LfSbIcrAAAAAAbh5FUpshF8xpab_YAjqFsnBpq6', {action: 'login'}).then(function(token) {
-          window.flutter_inappwebview.callHandler('recaptchaHandler', token);
+        grecaptcha.ready(function () {
+          grecaptcha.execute('6LfSbIcrAAAAAAbh5FUpshF8xpab_YAjqFsnBpq6', {action: 'login'}).then(function (token) {
+            window.flutter_inappwebview.callHandler('recaptchaHandler', token);
+          });
         });
       }
     </script>
