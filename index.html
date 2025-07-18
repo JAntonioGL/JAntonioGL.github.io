@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>reCAPTCHA v3 Bridge para Flutter (Corregido)</title>
+    <title>reCAPTCHA v3 Bridge para Flutter (Última Versión)</title>
     <!-- Carga la API de reCAPTCHA v3. Es crucial que esté aquí. -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
@@ -15,21 +15,21 @@
             font-family: 'Inter', sans-serif;
             background-color: #f0f0f0;
             color: #333;
-            overflow: hidden; /* Evita barras de desplazamiento si el contenido es más pequeño */
-            border-radius: 12px; /* Bordes redondeados para el cuerpo */
+            overflow: hidden;
+            border-radius: 12px;
         }
         .container {
             text-align: center;
             padding: 25px;
-            border-radius: 12px; /* Bordes redondeados para el contenedor */
+            border-radius: 12px;
             background-color: #ffffff;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             max-width: 90%;
             width: 350px;
-            box-sizing: border-box; /* Incluye padding y border en el ancho total */
+            box-sizing: border-box;
         }
         h1 {
-            color: #1a73e8; /* Color azul de Google */
+            color: #1a73e8;
             font-size: 1.8em;
             margin-bottom: 15px;
         }
@@ -44,12 +44,10 @@
             font-weight: bold;
             color: #007bff;
         }
-        /* Estilos para el logo de reCAPTCHA, si se hace visible */
         .grecaptcha-badge {
-            visibility: hidden !important; /* Generalmente oculto en v3 */
+            visibility: hidden !important;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 600px) {
             .container {
                 padding: 15px;
@@ -75,23 +73,19 @@
     </div>
 
     <script type="text/javascript">
-        // ¡CAMBIO CLAVE AQUÍ! El nombre de la función ahora es 'executeCaptcha'
-        // para que coincida con lo que el paquete 'flutter_gcaptcha_v3' espera.
-        window.executeCaptcha = function(siteKey, action) { // Hacemos la función global explícitamente
+        // ¡DEFINICIÓN EXPLÍCITA Y GLOBAL DE LA FUNCIÓN!
+        // Esta función debe llamarse 'executeCaptcha' para que coincida con lo que el paquete de Flutter espera.
+        window.executeCaptcha = function(siteKey, action) {
             document.getElementById('status-message').innerText = 'Estado: Ejecutando reCAPTCHA v3...';
-            console.log('reCAPTCHA: Ejecutando con siteKey:', siteKey, 'y acción:', action);
+            console.log('reCAPTCHA: Función executeCaptcha llamada con siteKey:', siteKey, 'y acción:', action);
 
             // Asegúrate de que la API de reCAPTCHA (grecaptcha) esté completamente cargada y lista.
             grecaptcha.ready(function() {
-                // Ejecuta la verificación de reCAPTCHA v3.
-                // El 'siteKey' y la 'action' son pasados desde Flutter.
                 grecaptcha.execute(siteKey, { action: action })
                     .then(function(token) {
                         document.getElementById('status-message').innerText = 'Estado: Token recibido. Enviando a Flutter...';
                         console.log('reCAPTCHA: Token generado:', token);
 
-                        // Envía el token de vuelta a Flutter a través del canal 'Captcha'.
-                        // El nombre 'Captcha' es el que usa flutter_gcaptcha_v3 internamente.
                         if (typeof Captcha !== 'undefined') {
                             Captcha.postMessage(token);
                             document.getElementById('status-message').innerText = 'Estado: Token enviado a Flutter.';
@@ -104,7 +98,6 @@
                     .catch(function(error) {
                         document.getElementById('status-message').innerText = 'Error reCAPTCHA: ' + error.message;
                         console.error('reCAPTCHA: Error al ejecutar:', error);
-                        // Opcional: Enviar un mensaje de error a Flutter si el canal existe
                         if (typeof Captcha !== 'undefined') {
                             Captcha.postMessage('ERROR:' + error.message);
                         }
@@ -112,10 +105,13 @@
             });
         };
 
+        // Confirma en la consola del navegador que la función se ha definido.
+        console.log('reCAPTCHA: executeCaptcha function defined globally.');
+
         // Esta función se ejecuta cuando el HTML está completamente cargado.
         window.onload = function() {
             document.getElementById('status-message').innerText = 'Estado: HTML cargado y listo para recibir comandos.';
-            console.log('reCAPTCHA: HTML completamente cargado.');
+            console.log('reCAPTCHA: HTML completamente cargado (window.onload).');
         };
     </script>
 </body>
