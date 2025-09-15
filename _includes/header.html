@@ -10,16 +10,15 @@
 
 
 <nav id="site-nav" class="site-nav">
-<ul>
-{% assign reversed_nav = site.nav | reverse %}
-{% for item in reversed_nav %}
-{% assign active = '' %}
-{% if page.section == item.section %}
-{% assign active = 'active' %}
-{% endif %}
-<li><a class="nav-link {{ active }}" href="{{ item.url | relative_url }}">{{ item.name }}</a></li>
-{% endfor %}
-</ul>
+  <ul>
+    {% for item in site.nav %}
+      {% assign active = '' %}
+      {% if page.section == item.section %}
+        {% assign active = 'active' %}
+      {% endif %}
+      <li><a class="nav-link {{ active }}" href="{{ item.url | relative_url }}">{{ item.name }}</a></li>
+    {% endfor %}
+  </ul>
 </nav>
 </div>
 </header>
