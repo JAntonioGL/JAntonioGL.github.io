@@ -1,16 +1,39 @@
 <footer class="site-footer">
-<div class="container footer-grid">
-<div>
-<strong>YoVerifico</strong><br>
-Planea y recuerda tu verificación vehicular
+<div class="container footer-inner">
+<div class="footer-grid">
+<div class="footer-brand">
+<strong>YoVerifico</strong>
+<small>Planea y recuerda tu verificación vehicular</small>
+<div class="socials" style="margin-top:.75rem;">
+<!-- Reemplaza # por tus URLs -->
+<a href="#" aria-label="X / Twitter" title="Twitter">
+<!-- icono mínimo -->
+<span>𝕏</span>
+</a>
+<a href="#" aria-label="Facebook" title="Facebook"><span>f</span></a>
+<a href="#" aria-label="Instagram" title="Instagram"><span>◎</span></a>
+<a href="#" aria-label="YouTube" title="YouTube"><span>▶</span></a>
+<a href="#" aria-label="LinkedIn" title="LinkedIn"><span>in</span></a>
 </div>
-<div>
-<a href="{{ "/quienes-somos" | relative_url }}">Quiénes somos</a><br>
-<a href="{{ "/faq" | relative_url }}">FAQ</a><br>
+</div>
+
+
+<nav class="footer-links" aria-label="Mapa del sitio">
+<a href="{{ "/" | relative_url }}">Inicio</a>
+<a href="{{ "/descargas" | relative_url }}">Descargas</a>
+<a href="{{ "/quienes-somos" | relative_url }}">Quiénes somos</a>
+<a href="{{ "/faq" | relative_url }}">FAQ</a>
 <a href="{{ "/contacto" | relative_url }}">Contacto</a>
-</div>
+</nav>
+
+
 <div>
-<small>© {{ site.time | date: "%Y" }} YoVerifico. Todos los derechos reservados.</small>
+<div>Desarrollado por: <strong>YoVerifico</strong></div>
+<div style="margin-top:.35rem;">
+<a href="{{ "/politicas-privacidad" | relative_url }}">Política de Privacidad</a>
+· <a href="{{ "/terminos" | relative_url }}">Términos</a>
+· <a href="{{ "/eliminar-cuenta" | relative_url }}">Eliminar cuenta</a>
+</div>
 </div>
 </div>
 </footer>
