@@ -14,6 +14,9 @@ nav:
   - name: "Aviso de privacidad"
     url: "/politicas-privacidad"
     section: privacidad
+  - name: "Términos y Condiciones"
+    url: "/terminos"
+    section: terminos  
   - name: "Contacto"
     url: "/contacto"
     section: contacto
