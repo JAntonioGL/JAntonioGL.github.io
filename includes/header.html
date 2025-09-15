@@ -1,0 +1,26 @@
+<header class="site-header">
+<div class="nav-wrap">
+<a class="brand" href="{{ "/" | relative_url }}" aria-label="Ir al inicio">
+<img src="{{ "/assets/img/logo.svg" | relative_url }}" alt="YoVerifico" class="logo">
+<span class="brand-text">YoVerifico</span>
+</a>
+
+
+<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Abrir menú">
+☰
+</button>
+
+
+<nav id="site-nav" class="site-nav">
+<ul>
+{% for item in site.nav %}
+{% assign active = '' %}
+{% if page.section == item.section %}
+{% assign active = 'active' %}
+{% endif %}
+<li><a class="nav-link {{ active }}" href="{{ item.url | relative_url }}">{{ item.name }}</a></li>
+{% endfor %}
+</ul>
+</nav>
+</div>
+</header>

@@ -1,0 +1,37 @@
+# Información básica del sitio
+title: YoVerifico
+description: App para recordar, planear y gestionar tu verificación vehicular.
+url: https://yoverifico.com.mx
+baseurl: ""
+lang: es-MX
+
+
+# Build
+markdown: kramdown
+kramdown:
+input: GFM
+
+
+# Plugins soportados por GitHub Pages
+plugins:
+- jekyll-seo-tag
+- jekyll-sitemap
+
+
+# Variables personalizadas
+nav:
+- name: Inicio
+url: "/"
+section: inicio
+- name: Descargas
+url: "/descargas"
+section: descargas
+- name: Quiénes somos
+url: "/quienes-somos"
+section: quienes
+- name: FAQ
+url: "/faq"
+section: faq
+- name: Contacto
+url: "/contacto"
+section: contacto
