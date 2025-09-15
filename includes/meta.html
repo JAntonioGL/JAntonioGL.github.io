@@ -1,12 +1,14 @@
-<title>{% if page.title %}{{ page.title }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+<title>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
 <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
 <link rel="icon" href="{{ "/assets/img/favicons/favicon.ico" | relative_url }}">
 <link rel="apple-touch-icon" href="{{ "/assets/img/favicons/apple-touch-icon.png" | relative_url }}">
-<meta name="theme-color" content="#0f766e">
-<!-- Open Graph -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Open Graph básico -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="{% if page.title %}{{ page.title }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}">
+<meta property="og:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
 <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <meta property="og:image" content="{{ "/assets/img/og-cover.png" | absolute_url }}">
+
 {% seo %}
