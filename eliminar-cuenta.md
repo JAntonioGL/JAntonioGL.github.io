@@ -102,12 +102,12 @@ permalink: /eliminar-cuenta
 </main>
 
 <!-- reCAPTCHA v3 -->
-<script src="https://www.google.com/recaptcha/api.js?render=TU_SITE_KEY"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl"></script>
 
 <script>
 (function(){
   const API_BASE = 'https://api.yoverifico.com.mx';
-  const SITE_KEY = 'TU_SITE_KEY';
+  const SITE_KEY = '6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl';
   const $ = s => document.querySelector(s);
   const show = (s,on=true)=>{const n=$(s); if(n) n.classList.toggle('hide', !on);};
   const disable = (s,on=true)=>{const n=$(s); if(n) n.disabled=on;};
