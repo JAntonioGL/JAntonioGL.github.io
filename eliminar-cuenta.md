@@ -15,7 +15,7 @@ permalink: /eliminar-cuenta
   <h1>Eliminar cuenta y datos</h1>
   <p class="muted">Plazo de atención: <strong>hasta 60 días hábiles</strong>. Por seguridad, verificaremos tu identidad con un código (OTP) y una confirmación escrita.</p>
 
-  <!-- Pantalla 1: correo (solicita OTP) -->
+  <!-- 1) EXISTE CORREO -->
   <section id="step1" class="card">
     <h2 style="margin-top:0">Paso 1 — Verifica tu correo</h2>
     <div class="field">
@@ -26,10 +26,9 @@ permalink: /eliminar-cuenta
       <button id="btnStep1">Continuar</button>
       <span id="status1" role="status" aria-live="polite"></span>
     </div>
-    <p class="helper">Si no tienes acceso a este correo, escribe a <a href="mailto:soporte@yoverifico.com.mx">soporte@yoverifico.com.mx</a>.</p>
   </section>
 
-  <!-- Pantalla 2: validar OTP -->
+  <!-- 2) OTP -->
   <section id="step2" class="card hide">
     <h2 style="margin-top:0">Paso 2 — Verifica el código</h2>
     <p class="muted">Enviamos un código (OTP) a tu correo. Revisa tu bandeja.</p>
@@ -43,7 +42,7 @@ permalink: /eliminar-cuenta
     </div>
   </section>
 
-  <!-- Pantalla 3: confirmación escrita -->
+  <!-- 3) CONFIRMACIÓN -->
   <section id="step3" class="card hide">
     <h2 style="margin-top:0">Paso 3 — Confirmación final</h2>
     <p>Escribe exactamente la siguiente frase para confirmar:</p>
@@ -65,7 +64,7 @@ permalink: /eliminar-cuenta
     </div>
   </section>
 
-  <!-- Final -->
+  <!-- DONE -->
   <section id="done" class="card hide">
     <h2 style="margin-top:0">Listo</h2>
     <p class="ok"><strong>Tu cuenta ha sido eliminada satisfactoriamente.</strong></p>
@@ -91,22 +90,20 @@ permalink: /eliminar-cuenta
   </section>
 </main>
 
-<!-- reCAPTCHA v3 -->
-<script src="https://www.google.com/recaptcha/api.js?render=6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl"></script>
-
+<script src="https://www.google.com/recaptcha/api.js?render=TU_SITE_KEY"></script>
 <script>
 (function(){
   const API_BASE = 'https://api.yoverifico.com.mx';
-  const SITE_KEY = '6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl';
+  const SITE_KEY = 'TU_SITE_KEY';
   const $ = s => document.querySelector(s);
   const show = (s,on=true)=>{const n=$(s); if(n) n.classList.toggle('hide', !on);};
   const disable = (s,on=true)=>{const n=$(s); if(n) n.disabled=on;};
   const txt = (s,m,ok)=>{const n=$(s); if(!n) return; n.textContent=m||''; n.className = ok===undefined ? '' : (ok?'ok':'err');};
   const scrollTo = (s)=>{ const n=$(s); if(n) n.scrollIntoView({behavior:'smooth', block:'start'}); };
 
-  let emailCache='', ticketCache='';
+  let correoCache='', ticketCache='';
   const phraseFor = (e)=>`Confirmo que deseo eliminar la cuenta ${e}`;
-  const updatePhrasePreview=()=>{$('#confirmPhrasePreview').textContent=phraseFor(emailCache);};
+  const updatePhrasePreview=()=>{$('#confirmPhrasePreview').textContent=phraseFor(correoCache);};
 
   function v3(action){
     return new Promise((res,rej)=>{
@@ -115,38 +112,49 @@ permalink: /eliminar-cuenta
     });
   }
 
-  // Pantalla 1 — solicitar OTP
+  // 1) EXISTE CORREO
   $('#btnStep1').addEventListener('click', async ()=>{
     const correo = $('#email').value.trim();
     if(!correo){ txt('#status1','Ingresa tu correo.', false); return; }
-    disable('#btnStep1', true); txt('#status1','Solicitando código…', true);
+    disable('#btnStep1', true); txt('#status1','Verificando correo…', true);
     try{
-      const captchaToken = await v3('otp_request');
-      const resp = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`,{
-        method:'POST', headers:{'Content-Type':'application/json'},
+      const captchaToken = await v3('existe_correo');
+      const r1 = await fetch(`${API_BASE}/api/auth/existe-correo`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ correo, captchaToken })
       });
-      const data = await resp.json().catch(()=>({}));
-      // Si tu API usa 404 cuando el correo no existe:
-      if(!resp.ok){
-        if(resp.status === 404 || data.ok === false){
-          txt('#status1','No existe un usuario registrado con ese correo.', false);
-          return;
-        }
-        throw new Error(data.message || 'Error al solicitar código');
+      const d1 = await r1.json().catch(()=>({}));
+      // Considera ambos casos: 404 o {exists:false}
+      if(!r1.ok || d1.exists === false){
+        txt('#status1','No existe un usuario registrado con ese correo.', false);
+        return;
       }
-      // Éxito: guardamos correo y pasamos a OTP
-      emailCache = correo; updatePhrasePreview();
+      // Si existe, ahora pide OTP
+      txt('#status1','Enviando código…', true);
+      const captcha2 = await v3('otp_request');
+      const r2 = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ correo, captchaToken: captcha2 })
+      });
+      const d2 = await r2.json().catch(()=>({}));
+      if(!r2.ok || d2.ok === false){
+        throw new Error(d2.message || 'No se pudo enviar el código.');
+      }
+
+      correoCache = correo; updatePhrasePreview();
       txt('#status1','Código enviado. Revisa tu bandeja.', true);
       show('#step2', true); show('#step1', false); scrollTo('#step2');
     }catch(e){
-      txt('#status1', e.message || 'No se pudo solicitar el código.', false);
+      console.error('Paso1', e);
+      txt('#status1', e.message || 'No se pudo procesar tu solicitud.', false);
     }finally{
       disable('#btnStep1', false);
     }
   });
 
-  // Pantalla 2 — verificar OTP
+  // 2) OTP VERIFY
   $('#btnStep2').addEventListener('click', async ()=>{
     const codigo = $('#otp').value.trim();
     if(!codigo){ txt('#status2','Ingresa el código OTP.', false); return; }
@@ -155,40 +163,40 @@ permalink: /eliminar-cuenta
       const captchaToken = await v3('otp_verify');
       const resp = await fetch(`${API_BASE}/api/usuario/account/delete/otp/verify`,{
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ correo: emailCache, codigo, captchaToken })
+        body: JSON.stringify({ correo: correoCache, codigo, captchaToken })
       });
       const data = await resp.json().catch(()=>({}));
-      if(!resp.ok){ throw new Error(data.message || 'Código inválido o expirado'); }
-      ticketCache = data.ticket || '';
-      if(!ticketCache) throw new Error('No se recibió ticket');
+      if(!resp.ok || !data.ticket){ throw new Error(data.message || 'Código inválido o expirado'); }
+      ticketCache = data.ticket;
       txt('#status2','Código verificado.', true);
       show('#step3', true); show('#step2', false); scrollTo('#step3');
     }catch(e){
+      console.error('Paso2', e);
       txt('#status2', e.message || 'No se pudo verificar el código.', false);
     }finally{
       disable('#btnStep2', false);
     }
   });
 
-  // Pantalla 3 — confirmación final
+  // 3) CONFIRM
   $('#btnStep3').addEventListener('click', async ()=>{
-    const must = phraseFor(emailCache);
+    const must = phraseFor(correoCache);
     const phrase = $('#confirmPhrase').value.trim();
     if(phrase !== must){ txt('#status3','La frase no coincide exactamente.', false); return; }
     if(!$('#consent').checked){ txt('#status3','Debes marcar el consentimiento.', false); return; }
     if(!ticketCache){ txt('#status3','No hay ticket válido.', false); return; }
+
     disable('#btnStep3', true); txt('#status3','Confirmando…', true);
     try{
-      // (Según tu especificación, /confirm NO requiere captchaToken)
       const resp = await fetch(`${API_BASE}/api/usuario/account/delete/confirm`,{
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ ticket: ticketCache })
       });
       const data = await resp.json().catch(()=>({}));
       if(!resp.ok || data.ok === false){ throw new Error(data.message || 'Error al confirmar'); }
-      // Final
       show('#step1', false); show('#step2', false); show('#step3', false); show('#done', true); scrollTo('#done');
     }catch(e){
+      console.error('Paso3', e);
       txt('#status3', e.message || 'No se pudo confirmar la solicitud.', false);
     }finally{
       disable('#btnStep3', false);
