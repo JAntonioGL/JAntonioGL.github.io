@@ -90,7 +90,9 @@ permalink: /eliminar-cuenta
   </section>
 </main>
 
+<!-- reCAPTCHA v3 -->
 <script src="https://www.google.com/recaptcha/api.js?render=6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl"></script>
+
 <script>
 (function(){
   const API_BASE = 'https://api.yoverifico.com.mx';
@@ -112,70 +114,66 @@ permalink: /eliminar-cuenta
     });
   }
 
- // 1) EXISTE CORREO (versión robusta)
-$('#btnStep1').addEventListener('click', async ()=>{
-  const correo = $('#email').value.trim().toLowerCase();
-  if(!correo){ txt('#status1','Ingresa tu correo.', false); return; }
-  disable('#btnStep1', true); txt('#status1','Verificando correo…', true);
+  // 1) EXISTE CORREO (respeta anti-enumeración y acción esperada)
+  $('#btnStep1').addEventListener('click', async ()=>{
+    const correo = $('#email').value.trim().toLowerCase();
+    if(!correo){ txt('#status1','Ingresa tu correo.', false); return; }
+    disable('#btnStep1', true); txt('#status1','Verificando correo…', true);
 
-  try{
-    // IMPORTANTE: usa la acción que tu backend espera:
-    const captchaToken = await v3('pwd_recovery_check'); // ← o 'existe_correo' si cambias backend
-    const r1 = await fetch(`${API_BASE}/api/auth/existe-correo`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ correo, captchaToken })
-    });
+    try{
+      const captchaToken = await v3('pwd_recovery_check'); // 👈 acción que tu backend espera
+      const r1 = await fetch(`${API_BASE}/api/auth/existe-correo`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ correo, captchaToken })
+      });
 
-    let d1 = {};
-    try { d1 = await r1.clone().json(); } catch { d1 = { raw: await r1.text().catch(()=>null) }; }
-    console.log('EXISTE status', r1.status, 'body', d1);
+      let d1 = {};
+      try { d1 = await r1.clone().json(); } catch { d1 = { raw: await r1.text().catch(()=>null) }; }
+      console.log('EXISTE status', r1.status, 'body', d1);
 
-    if (r1.status !== 200) {
-      const serverMsg = d1.message || d1.msg || (typeof d1 === 'string' ? d1 : null);
-      txt('#status1', serverMsg || `No se pudo verificar el correo (HTTP ${r1.status}).`, false);
-      return;
+      if (r1.status !== 200) {
+        const serverMsg = d1.message || d1.msg || (typeof d1 === 'string' ? d1 : null);
+        txt('#status1', serverMsg || `No se pudo verificar el correo (HTTP ${r1.status}).`, false);
+        return;
+      }
+
+      const enumHidden = d1.ok === true && typeof d1.existe === 'undefined';
+      const existe = d1.existe === true || d1.existe === 'true';
+
+      if (!enumHidden && !existe) {
+        txt('#status1','No existe un usuario registrado con ese correo.', false);
+        return;
+      }
+
+      // Si existe (o anti-enumeración): pide OTP
+      txt('#status1','Enviando código…', true);
+      const captcha2 = await v3('otp_request');
+      const r2 = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ correo, captchaToken: captcha2 })
+      });
+
+      let d2 = {};
+      try { d2 = await r2.clone().json(); } catch { d2 = { raw: await r2.text().catch(()=>null) }; }
+      console.log('OTP REQUEST status', r2.status, 'body', d2);
+
+      if (!(r2.status >= 200 && r2.status < 300 && (d2.ok === true || d2.ok === 'true'))) {
+        throw new Error(d2.message || d2.msg || 'No se pudo enviar el código.');
+      }
+
+      correoCache = correo; updatePhrasePreview();
+      txt('#status1','Código enviado. Revisa tu bandeja.', true);
+      show('#step2', true); show('#step1', false); scrollTo('#step2');
+
+    } catch(e){
+      console.error('Paso1', e);
+      txt('#status1', e.message || 'No se pudo procesar tu solicitud.', false);
+    } finally{
+      disable('#btnStep1', false);
     }
-
-    // Modo enumeración ON: { ok:true } sin "existe" -> asumimos que existe
-    const enumHidden = d1.ok === true && typeof d1.existe === 'undefined';
-
-    // Modo explícito: { ok:true, existe:true/false }
-    const existe = d1.existe === true || d1.existe === 'true';
-
-    if (!enumHidden && !existe) {
-      txt('#status1','No existe un usuario registrado con ese correo.', false);
-      return;
-    }
-
-    // Si llegamos aquí: asumimos existencia -> pedimos OTP
-    txt('#status1','Enviando código…', true);
-    const captcha2 = await v3('otp_request');
-    const r2 = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ correo, captchaToken: captcha2 })
-    });
-
-    let d2 = {};
-    try { d2 = await r2.clone().json(); } catch { d2 = { raw: await r2.text().catch(()=>null) }; }
-    console.log('OTP REQUEST status', r2.status, 'body', d2);
-
-    if (!(r2.status >= 200 && r2.status < 300 && (d2.ok === true || d2.ok === 'true'))) {
-      throw new Error(d2.message || d2.msg || 'No se pudo enviar el código.');
-    }
-
-    correoCache = correo; updatePhrasePreview();
-    txt('#status1','Código enviado. Revisa tu bandeja.', true);
-    show('#step2', true); show('#step1', false); scrollTo('#step2');
-
-  } catch(e){
-    console.error('Paso1', e);
-    txt('#status1', e.message || 'No se pudo procesar tu solicitud.', false);
-  } finally{
-    disable('#btnStep1', false);
-  }
-});
+  });
 
   // 2) OTP VERIFY
   $('#btnStep2').addEventListener('click', async ()=>{
@@ -188,8 +186,13 @@ $('#btnStep1').addEventListener('click', async ()=>{
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ correo: correoCache, codigo, captchaToken })
       });
-      const data = await resp.json().catch(()=>({}));
-      if(!resp.ok || !data.ticket){ throw new Error(data.message || 'Código inválido o expirado'); }
+      let data = {};
+      try { data = await resp.clone().json(); } catch { data = { raw: await resp.text().catch(()=>null) }; }
+      console.log('OTP VERIFY status', resp.status, 'body', data);
+
+      if(!(resp.status >= 200 && resp.status < 300 && data.ticket)){
+        throw new Error(data.message || data.msg || 'Código inválido o expirado');
+      }
       ticketCache = data.ticket;
       txt('#status2','Código verificado.', true);
       show('#step3', true); show('#step2', false); scrollTo('#step3');
@@ -215,8 +218,13 @@ $('#btnStep1').addEventListener('click', async ()=>{
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ ticket: ticketCache })
       });
-      const data = await resp.json().catch(()=>({}));
-      if(!resp.ok || data.ok === false){ throw new Error(data.message || 'Error al confirmar'); }
+      let data = {};
+      try { data = await resp.clone().json(); } catch { data = { raw: await resp.text().catch(()=>null) }; }
+      console.log('CONFIRM status', resp.status, 'body', data);
+
+      if(!(resp.status >= 200 && resp.status < 300 && (data.ok === true || data.ok === 'true'))){
+        throw new Error(data.message || data.msg || 'Error al confirmar');
+      }
       show('#step1', false); show('#step2', false); show('#step3', false); show('#done', true); scrollTo('#done');
     }catch(e){
       console.error('Paso3', e);
