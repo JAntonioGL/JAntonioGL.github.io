@@ -125,7 +125,7 @@ permalink: /eliminar-cuenta
         body: JSON.stringify({ correo, captchaToken })
       });
       const d1 = await r1.json().catch(()=>({}));
-      // Considera ambos casos: 404 o {exists:false}
+      // Considera ambos casos: 404 o {existe:false}
       if(!r1.ok || d1.existe === false){
         txt('#status1','No existe un usuario registrado con ese correo.', false);
         return;
