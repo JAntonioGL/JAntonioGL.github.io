@@ -112,61 +112,62 @@ permalink: /eliminar-cuenta
     });
   }
 
-  // 1) EXISTE CORREO (REEMPLAZA este handler)
+ // 1) EXISTE CORREO (versión robusta)
 $('#btnStep1').addEventListener('click', async ()=>{
   const correo = $('#email').value.trim().toLowerCase();
   if(!correo){ txt('#status1','Ingresa tu correo.', false); return; }
   disable('#btnStep1', true); txt('#status1','Verificando correo…', true);
 
   try{
-    const captchaToken = await v3('existe_correo'); // asegúrate que el backend espera esta "action"
+    // IMPORTANTE: usa la acción que tu backend espera:
+    const captchaToken = await v3('pwd_recovery_check'); // ← o 'existe_correo' si cambias backend
     const r1 = await fetch(`${API_BASE}/api/auth/existe-correo`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ correo, captchaToken })
     });
 
-    // intenta parsear JSON, aunque venga con otro content-type
     let d1 = {};
     try { d1 = await r1.clone().json(); } catch { d1 = { raw: await r1.text().catch(()=>null) }; }
-
     console.log('EXISTE status', r1.status, 'body', d1);
 
-    // ✅ Caso feliz: 200 y existe === true
-    if (r1.status === 200 && (d1.existe === true || d1.existe === 'true')) {
-      txt('#status1','Enviando código…', true);
-
-      const captcha2 = await v3('otp_request');
-      const r2 = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ correo, captchaToken: captcha2 })
-      });
-
-      let d2 = {};
-      try { d2 = await r2.clone().json(); } catch { d2 = { raw: await r2.text().catch(()=>null) }; }
-
-      console.log('OTP REQUEST status', r2.status, 'body', d2);
-
-      if (r2.status >= 200 && r2.status < 300 && (d2.ok === true || d2.ok === 'true')) {
-        correoCache = correo; updatePhrasePreview();
-        txt('#status1','Código enviado. Revisa tu bandeja.', true);
-        show('#step2', true); show('#step1', false); scrollTo('#step2');
-        return;
-      }
-
-      throw new Error(d2.message || d2.msg || 'No se pudo enviar el código.');
+    if (r1.status !== 200) {
+      const serverMsg = d1.message || d1.msg || (typeof d1 === 'string' ? d1 : null);
+      txt('#status1', serverMsg || `No se pudo verificar el correo (HTTP ${r1.status}).`, false);
+      return;
     }
 
-    // ❌ 200 pero existe === false → mensaje correcto “no existe”
-    if (r1.status === 200 && (d1.existe === false || d1.existe === 'false')) {
+    // Modo enumeración ON: { ok:true } sin "existe" -> asumimos que existe
+    const enumHidden = d1.ok === true && typeof d1.existe === 'undefined';
+
+    // Modo explícito: { ok:true, existe:true/false }
+    const existe = d1.existe === true || d1.existe === 'true';
+
+    if (!enumHidden && !existe) {
       txt('#status1','No existe un usuario registrado con ese correo.', false);
       return;
     }
 
-    // ❌ Cualquier otro estatus → error explícito (captcha, CORS, validación, etc.)
-    const serverMsg = d1.message || d1.msg || (typeof d1 === 'string' ? d1 : null);
-    txt('#status1', serverMsg || `No se pudo verificar el correo (HTTP ${r1.status}).`, false);
+    // Si llegamos aquí: asumimos existencia -> pedimos OTP
+    txt('#status1','Enviando código…', true);
+    const captcha2 = await v3('otp_request');
+    const r2 = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ correo, captchaToken: captcha2 })
+    });
+
+    let d2 = {};
+    try { d2 = await r2.clone().json(); } catch { d2 = { raw: await r2.text().catch(()=>null) }; }
+    console.log('OTP REQUEST status', r2.status, 'body', d2);
+
+    if (!(r2.status >= 200 && r2.status < 300 && (d2.ok === true || d2.ok === 'true'))) {
+      throw new Error(d2.message || d2.msg || 'No se pudo enviar el código.');
+    }
+
+    correoCache = correo; updatePhrasePreview();
+    txt('#status1','Código enviado. Revisa tu bandeja.', true);
+    show('#step2', true); show('#step1', false); scrollTo('#step2');
 
   } catch(e){
     console.error('Paso1', e);
