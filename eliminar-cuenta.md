@@ -8,7 +8,6 @@ permalink: /eliminar-cuenta
 
 <style>
   .hide { display: none !important; }
-  /* (Opcional) pequeños estilos para el demo */
   .ok{color:#0f766e}.err{color:#b91c1c}
 </style>
 
@@ -16,7 +15,7 @@ permalink: /eliminar-cuenta
   <h1>Eliminar cuenta y datos</h1>
   <p class="muted">Plazo de atención: <strong>hasta 60 días hábiles</strong>. Por seguridad, verificaremos tu identidad con un código (OTP) y una confirmación escrita.</p>
 
-  <!-- Paso 1: correo -->
+  <!-- Pantalla 1: correo (solicita OTP) -->
   <section id="step1" class="card">
     <h2 style="margin-top:0">Paso 1 — Verifica tu correo</h2>
     <div class="field">
@@ -30,32 +29,23 @@ permalink: /eliminar-cuenta
     <p class="helper">Si no tienes acceso a este correo, escribe a <a href="mailto:soporte@yoverifico.com.mx">soporte@yoverifico.com.mx</a>.</p>
   </section>
 
-  <!-- Paso 2: enviar OTP -->
+  <!-- Pantalla 2: validar OTP -->
   <section id="step2" class="card hide">
-    <h2 style="margin-top:0">Paso 2 — Solicita tu código</h2>
-    <p class="muted">Enviaremos un código (OTP) a tu correo.</p>
-    <div class="actions">
-      <button id="btnStep2">Enviar código</button>
-      <span id="status2" role="status" aria-live="polite"></span>
-    </div>
-  </section>
-
-  <!-- Paso 3: validar OTP -->
-  <section id="step3" class="card hide">
-    <h2 style="margin-top:0">Paso 3 — Verifica el código</h2>
+    <h2 style="margin-top:0">Paso 2 — Verifica el código</h2>
+    <p class="muted">Enviamos un código (OTP) a tu correo. Revisa tu bandeja.</p>
     <div class="field">
       <label for="otp">Código recibido (OTP) <span style="color:red">*</span></label>
       <input id="otp" type="text" inputmode="numeric" placeholder="Ingresa el código" />
     </div>
     <div class="actions">
-      <button id="btnStep3">Validar código</button>
-      <span id="status3" role="status" aria-live="polite"></span>
+      <button id="btnStep2">Validar código</button>
+      <span id="status2" role="status" aria-live="polite"></span>
     </div>
   </section>
 
-  <!-- Paso 4: confirmación escrita -->
-  <section id="step4" class="card hide">
-    <h2 style="margin-top:0">Paso 4 — Confirmación final</h2>
+  <!-- Pantalla 3: confirmación escrita -->
+  <section id="step3" class="card hide">
+    <h2 style="margin-top:0">Paso 3 — Confirmación final</h2>
     <p>Escribe exactamente la siguiente frase para confirmar:</p>
     <p class="helper" id="confirmPhrasePreview" style="background:#F1F5F9;border:1px solid #E5E7EB;padding:8px;border-radius:8px"></p>
 
@@ -70,8 +60,8 @@ permalink: /eliminar-cuenta
     </div>
 
     <div class="actions">
-      <button id="btnStep4">Confirmar eliminación</button>
-      <span id="status4" role="status" aria-live="polite"></span>
+      <button id="btnStep3">Confirmar eliminación</button>
+      <span id="status3" role="status" aria-live="polite"></span>
     </div>
   </section>
 
@@ -125,100 +115,84 @@ permalink: /eliminar-cuenta
     });
   }
 
-  // Paso 1 — existe-correo
+  // Pantalla 1 — solicitar OTP
   $('#btnStep1').addEventListener('click', async ()=>{
-    const email = $('#email').value.trim();
-    if(!email){ txt('#status1','Ingresa tu correo.', false); return; }
-    disable('#btnStep1', true); txt('#status1','Verificando…', true);
+    const correo = $('#email').value.trim();
+    if(!correo){ txt('#status1','Ingresa tu correo.', false); return; }
+    disable('#btnStep1', true); txt('#status1','Solicitando código…', true);
     try{
-      const captcha = await v3('existe_correo');
-      const resp = await fetch(`${API_BASE}/api/auth/existe-correo`,{
+      const captchaToken = await v3('otp_request');
+      const resp = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`,{
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email, captcha })
+        body: JSON.stringify({ correo, captchaToken })
       });
       const data = await resp.json().catch(()=>({}));
+      // Si tu API usa 404 cuando el correo no existe:
       if(!resp.ok){
-        if(resp.status===404 || data.exists===false){
+        if(resp.status === 404 || data.ok === false){
           txt('#status1','No existe un usuario registrado con ese correo.', false);
           return;
         }
-        throw new Error(data.message || 'Error al verificar');
+        throw new Error(data.message || 'Error al solicitar código');
       }
-      if(data.exists===false){
-        txt('#status1','No existe un usuario registrado con ese correo.', false);
-        return;
-      }
-      emailCache = email; updatePhrasePreview();
-      txt('#status1','Correo verificado.', true);
-      show('#step2', true); show('#step1', false);  // ← oculta Paso 1
-      scrollTo('#step2');
-    }catch(e){ txt('#status1', e.message || 'No se pudo verificar.', false); }
-    finally{ disable('#btnStep1', false); }
+      // Éxito: guardamos correo y pasamos a OTP
+      emailCache = correo; updatePhrasePreview();
+      txt('#status1','Código enviado. Revisa tu bandeja.', true);
+      show('#step2', true); show('#step1', false); scrollTo('#step2');
+    }catch(e){
+      txt('#status1', e.message || 'No se pudo solicitar el código.', false);
+    }finally{
+      disable('#btnStep1', false);
+    }
   });
 
-  // Paso 2 — solicitar OTP
+  // Pantalla 2 — verificar OTP
   $('#btnStep2').addEventListener('click', async ()=>{
-    if(!emailCache){ txt('#status2','Ingresa tu correo primero.', false); return; }
-    disable('#btnStep2', true); txt('#status2','Enviando código…', true);
+    const codigo = $('#otp').value.trim();
+    if(!codigo){ txt('#status2','Ingresa el código OTP.', false); return; }
+    disable('#btnStep2', true); txt('#status2','Validando código…', true);
     try{
-      const captcha = await v3('otp_request');
-      const resp = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`,{
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email: emailCache, captcha })
-      });
-      const data = await resp.json().catch(()=>({}));
-      if(!resp.ok){ throw new Error(data.message || 'Error al solicitar código'); }
-      txt('#status2','Código enviado. Revisa tu bandeja.', true);
-      show('#step3', true); show('#step2', false);  // ← oculta Paso 2
-      scrollTo('#step3');
-    }catch(e){ txt('#status2', e.message || 'No se pudo enviar el código.', false); }
-    finally{ disable('#btnStep2', false); }
-  });
-
-  // Paso 3 — verificar OTP
-  $('#btnStep3').addEventListener('click', async ()=>{
-    const otp = $('#otp').value.trim();
-    if(!otp){ txt('#status3','Ingresa el código OTP.', false); return; }
-    disable('#btnStep3', true); txt('#status3','Validando código…', true);
-    try{
-      const captcha = await v3('otp_verify');
+      const captchaToken = await v3('otp_verify');
       const resp = await fetch(`${API_BASE}/api/usuario/account/delete/otp/verify`,{
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email: emailCache, otp, captcha })
+        body: JSON.stringify({ correo: emailCache, codigo, captchaToken })
       });
       const data = await resp.json().catch(()=>({}));
       if(!resp.ok){ throw new Error(data.message || 'Código inválido o expirado'); }
-      ticketCache = data.ticket || (data.result && data.result.ticket) || '';
+      ticketCache = data.ticket || '';
       if(!ticketCache) throw new Error('No se recibió ticket');
-      txt('#status3','Código verificado.', true);
-      show('#step4', true); show('#step3', false);  // ← oculta Paso 3
-      scrollTo('#step4');
-    }catch(e){ txt('#status3', e.message || 'No se pudo verificar el código.', false); }
-    finally{ disable('#btnStep3', false); }
+      txt('#status2','Código verificado.', true);
+      show('#step3', true); show('#step2', false); scrollTo('#step3');
+    }catch(e){
+      txt('#status2', e.message || 'No se pudo verificar el código.', false);
+    }finally{
+      disable('#btnStep2', false);
+    }
   });
 
-  // Paso 4 — confirmación final
-  $('#btnStep4').addEventListener('click', async ()=>{
+  // Pantalla 3 — confirmación final
+  $('#btnStep3').addEventListener('click', async ()=>{
     const must = phraseFor(emailCache);
     const phrase = $('#confirmPhrase').value.trim();
-    if(phrase !== must){ txt('#status4','La frase no coincide exactamente.', false); return; }
-    if(!$('#consent').checked){ txt('#status4','Debes marcar el consentimiento.', false); return; }
-    if(!ticketCache){ txt('#status4','No hay ticket válido.', false); return; }
-    disable('#btnStep4', true); txt('#status4','Confirmando…', true);
+    if(phrase !== must){ txt('#status3','La frase no coincide exactamente.', false); return; }
+    if(!$('#consent').checked){ txt('#status3','Debes marcar el consentimiento.', false); return; }
+    if(!ticketCache){ txt('#status3','No hay ticket válido.', false); return; }
+    disable('#btnStep3', true); txt('#status3','Confirmando…', true);
     try{
-      const captcha = await v3('delete_confirm');
+      // (Según tu especificación, /confirm NO requiere captchaToken)
       const resp = await fetch(`${API_BASE}/api/usuario/account/delete/confirm`,{
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ ticket: ticketCache, captcha })
+        body: JSON.stringify({ ticket: ticketCache })
       });
       const data = await resp.json().catch(()=>({}));
-      if(!resp.ok){ throw new Error(data.message || 'Error al confirmar'); }
-      // Pantalla final
-      show('#step1', false); show('#step2', false); show('#step3', false); show('#step4', false);
-      show('#done', true);
-      scrollTo('#done');
-    }catch(e){ txt('#status4', e.message || 'No se pudo confirmar la solicitud.', false); }
-    finally{ disable('#btnStep4', false); }
+      if(!resp.ok || data.ok === false){ throw new Error(data.message || 'Error al confirmar'); }
+      // Final
+      show('#step1', false); show('#step2', false); show('#step3', false); show('#done', true); scrollTo('#done');
+    }catch(e){
+      txt('#status3', e.message || 'No se pudo confirmar la solicitud.', false);
+    }finally{
+      disable('#btnStep3', false);
+    }
   });
 })();
 </script>
