@@ -6,7 +6,12 @@ section: eliminar
 permalink: /eliminar-cuenta
 ---
 
-<!-- Contenido de la página (SIN <html> ni <head>) -->
+<style>
+  .hide { display: none !important; }
+  /* (Opcional) pequeños estilos para el demo */
+  .ok{color:#0f766e}.err{color:#b91c1c}
+</style>
+
 <main class="container" style="max-width:760px">
   <h1>Eliminar cuenta y datos</h1>
   <p class="muted">Plazo de atención: <strong>hasta 60 días hábiles</strong>. Por seguridad, verificaremos tu identidad con un código (OTP) y una confirmación escrita.</p>
@@ -97,17 +102,17 @@ permalink: /eliminar-cuenta
 </main>
 
 <!-- reCAPTCHA v3 -->
-<script src="https://www.google.com/recaptcha/api.js?render=6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=TU_SITE_KEY"></script>
 
-<!-- JS de la página (mismo que te pasé, adaptado a v3) -->
 <script>
 (function(){
   const API_BASE = 'https://api.yoverifico.com.mx';
-  const SITE_KEY = '6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl';
+  const SITE_KEY = 'TU_SITE_KEY';
   const $ = s => document.querySelector(s);
   const show = (s,on=true)=>{const n=$(s); if(n) n.classList.toggle('hide', !on);};
   const disable = (s,on=true)=>{const n=$(s); if(n) n.disabled=on;};
   const txt = (s,m,ok)=>{const n=$(s); if(!n) return; n.textContent=m||''; n.className = ok===undefined ? '' : (ok?'ok':'err');};
+  const scrollTo = (s)=>{ const n=$(s); if(n) n.scrollIntoView({behavior:'smooth', block:'start'}); };
 
   let emailCache='', ticketCache='';
   const phraseFor = (e)=>`Confirmo que deseo eliminar la cuenta ${e}`;
@@ -120,7 +125,7 @@ permalink: /eliminar-cuenta
     });
   }
 
-  // Paso 1
+  // Paso 1 — existe-correo
   $('#btnStep1').addEventListener('click', async ()=>{
     const email = $('#email').value.trim();
     if(!email){ txt('#status1','Ingresa tu correo.', false); return; }
@@ -135,24 +140,23 @@ permalink: /eliminar-cuenta
       if(!resp.ok){
         if(resp.status===404 || data.exists===false){
           txt('#status1','No existe un usuario registrado con ese correo.', false);
-          disable('#btnStep1', false);
           return;
         }
         throw new Error(data.message || 'Error al verificar');
       }
       if(data.exists===false){
         txt('#status1','No existe un usuario registrado con ese correo.', false);
-        disable('#btnStep1', false);
         return;
       }
       emailCache = email; updatePhrasePreview();
       txt('#status1','Correo verificado.', true);
-      show('#step2', true);
+      show('#step2', true); show('#step1', false);  // ← oculta Paso 1
+      scrollTo('#step2');
     }catch(e){ txt('#status1', e.message || 'No se pudo verificar.', false); }
     finally{ disable('#btnStep1', false); }
   });
 
-  // Paso 2
+  // Paso 2 — solicitar OTP
   $('#btnStep2').addEventListener('click', async ()=>{
     if(!emailCache){ txt('#status2','Ingresa tu correo primero.', false); return; }
     disable('#btnStep2', true); txt('#status2','Enviando código…', true);
@@ -165,12 +169,13 @@ permalink: /eliminar-cuenta
       const data = await resp.json().catch(()=>({}));
       if(!resp.ok){ throw new Error(data.message || 'Error al solicitar código'); }
       txt('#status2','Código enviado. Revisa tu bandeja.', true);
-      show('#step3', true);
+      show('#step3', true); show('#step2', false);  // ← oculta Paso 2
+      scrollTo('#step3');
     }catch(e){ txt('#status2', e.message || 'No se pudo enviar el código.', false); }
     finally{ disable('#btnStep2', false); }
   });
 
-  // Paso 3
+  // Paso 3 — verificar OTP
   $('#btnStep3').addEventListener('click', async ()=>{
     const otp = $('#otp').value.trim();
     if(!otp){ txt('#status3','Ingresa el código OTP.', false); return; }
@@ -186,12 +191,13 @@ permalink: /eliminar-cuenta
       ticketCache = data.ticket || (data.result && data.result.ticket) || '';
       if(!ticketCache) throw new Error('No se recibió ticket');
       txt('#status3','Código verificado.', true);
-      show('#step4', true);
+      show('#step4', true); show('#step3', false);  // ← oculta Paso 3
+      scrollTo('#step4');
     }catch(e){ txt('#status3', e.message || 'No se pudo verificar el código.', false); }
     finally{ disable('#btnStep3', false); }
   });
 
-  // Paso 4
+  // Paso 4 — confirmación final
   $('#btnStep4').addEventListener('click', async ()=>{
     const must = phraseFor(emailCache);
     const phrase = $('#confirmPhrase').value.trim();
@@ -207,8 +213,10 @@ permalink: /eliminar-cuenta
       });
       const data = await resp.json().catch(()=>({}));
       if(!resp.ok){ throw new Error(data.message || 'Error al confirmar'); }
+      // Pantalla final
       show('#step1', false); show('#step2', false); show('#step3', false); show('#step4', false);
       show('#done', true);
+      scrollTo('#done');
     }catch(e){ txt('#status4', e.message || 'No se pudo confirmar la solicitud.', false); }
     finally{ disable('#btnStep4', false); }
   });
