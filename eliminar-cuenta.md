@@ -90,7 +90,7 @@ permalink: /eliminar-cuenta
   </section>
 </main>
 
-<!-- reCAPTCHA v3 -->
+<!-- reCAPTCHA v3 (usa tu site key) -->
 <script src="https://www.google.com/recaptcha/api.js?render=6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl"></script>
 
 <script>
@@ -121,7 +121,8 @@ permalink: /eliminar-cuenta
     disable('#btnStep1', true); txt('#status1','Verificando correo…', true);
 
     try{
-      const captchaToken = await v3('pwd_recovery_check'); // 👈 acción que tu backend espera
+      // 👈 acción que tu backend espera para existencia
+      const captchaToken = await v3('pwd_recovery_check');
       const r1 = await fetch(`${API_BASE}/api/auth/existe-correo`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -146,9 +147,9 @@ permalink: /eliminar-cuenta
         return;
       }
 
-      // Si existe (o anti-enumeración): pide OTP
+      // 2a) SOLICITAR OTP — acción: acc_delete_request
       txt('#status1','Enviando código…', true);
-      const captcha2 = await v3('otp_request');
+      const captcha2 = await v3('acc_delete_request'); // 👈 coincide con tu expectedAction
       const r2 = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -175,15 +176,16 @@ permalink: /eliminar-cuenta
     }
   });
 
-  // 2) OTP VERIFY
+  // 2b) OTP VERIFY — acción: acc_delete_verify (backend la valida solo si CAPTCHA_ON_VERIFY==='true')
   $('#btnStep2').addEventListener('click', async ()=>{
     const codigo = $('#otp').value.trim();
     if(!codigo){ txt('#status2','Ingresa el código OTP.', false); return; }
     disable('#btnStep2', true); txt('#status2','Validando código…', true);
     try{
-      const captchaToken = await v3('otp_verify');
+      const captchaToken = await v3('acc_delete_verify'); // ok aunque backend no la exija siempre
       const resp = await fetch(`${API_BASE}/api/usuario/account/delete/otp/verify`,{
-        method:'POST', headers:{'Content-Type':'application/json'},
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ correo: correoCache, codigo, captchaToken })
       });
       let data = {};
