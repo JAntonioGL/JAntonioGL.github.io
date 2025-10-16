@@ -15,6 +15,7 @@ permalink: /eliminar-cuenta
   <h1>Eliminar cuenta y datos</h1>
   <p class="muted">Plazo de atención: <strong>hasta 60 días hábiles</strong>. Por seguridad, verificaremos tu identidad con un código (OTP) y una confirmación escrita.</p>
 
+  <!-- 1) EXISTE CORREO -->
   <section id="step1" class="card">
     <h2 style="margin-top:0">Paso 1 — Verifica tu correo</h2>
     <div class="field">
@@ -27,6 +28,7 @@ permalink: /eliminar-cuenta
     </div>
   </section>
 
+  <!-- 2) OTP -->
   <section id="step2" class="card hide">
     <h2 style="margin-top:0">Paso 2 — Verifica el código</h2>
     <p class="muted">Enviamos un código (OTP) a tu correo. Revisa tu bandeja.</p>
@@ -40,6 +42,7 @@ permalink: /eliminar-cuenta
     </div>
   </section>
 
+  <!-- 3) CONFIRMACIÓN -->
   <section id="step3" class="card hide">
     <h2 style="margin-top:0">Paso 3 — Confirmación final</h2>
     <p>Escribe exactamente la siguiente frase para confirmar:</p>
@@ -61,6 +64,7 @@ permalink: /eliminar-cuenta
     </div>
   </section>
 
+  <!-- DONE -->
   <section id="done" class="card hide">
     <h2 style="margin-top:0">Listo</h2>
     <p class="ok"><strong>Tu cuenta ha sido eliminada satisfactoriamente.</strong></p>
@@ -86,17 +90,13 @@ permalink: /eliminar-cuenta
   </section>
 </main>
 
-<script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
-
-<div id="recaptcha-anchor" style="display:none;"></div>
-
+<!-- reCAPTCHA v3 (usa tu site key) -->
+<script src="https://www.google.com/recaptcha/api.js?render=6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl"></script>
 
 <script>
 (function(){
   const API_BASE = 'https://api.yoverifico.com.mx';
-  // 🚨 REEMPLAZAR CON TU CLAVE PUBLICA V2 (la que empieza con 6L...)
-  const SITE_KEY_V2 = 'TU_CLAVE_PUBLICA_V2'; 
-
+  const SITE_KEY = '6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl';
   const $ = s => document.querySelector(s);
   const show = (s,on=true)=>{const n=$(s); if(n) n.classList.toggle('hide', !on);};
   const disable = (s,on=true)=>{const n=$(s); if(n) n.disabled=on;};
@@ -107,50 +107,12 @@ permalink: /eliminar-cuenta
   const phraseFor = (e)=>`Confirmo que deseo eliminar la cuenta ${e}`;
   const updatePhrasePreview=()=>{$('#confirmPhrasePreview').textContent=phraseFor(correoCache);};
 
-  // 🔑 VARIABLES GLOBALES PARA V2 INVISIBLE
-  let recaptchaWidgetId;
-  let recaptchaResolve;
-
-  window.onRecaptchaLoad = function() {
-    // Renderiza el widget V2 INVISIBLE. Solo se dispara cuando ejecutamos.
-    if(window.grecaptcha) {
-      recaptchaWidgetId = grecaptcha.render('recaptcha-anchor', {
-        'sitekey': SITE_KEY_V2,
-        'size': 'invisible',
-        'callback': function(token) {
-          if (recaptchaResolve) {
-            recaptchaResolve(token);
-            recaptchaResolve = null;
-            grecaptcha.reset(recaptchaWidgetId); // Resetea inmediatamente después de obtener el token
-          }
-        },
-        'expired-callback': function() {
-          if (recaptchaResolve) {
-            recaptchaResolve(null);
-            recaptchaResolve = null;
-          }
-          grecaptcha.reset(recaptchaWidgetId);
-        }
-      });
-    }
-  };
-
-
-  /** * Función adaptada de V3 a V2 Invisible.
-   * Ejecuta el desafío; si Google lo considera sospechoso, muestra el pop-up de la casilla V2.
-   * @returns {Promise<string|null>} El token o null.
-   */
-  function v2() {
-    return new Promise((res, rej) => {
+  function v3(action){
+    return new Promise((res,rej)=>{
       if(!window.grecaptcha) return rej(new Error('reCAPTCHA no cargó'));
-      if(!recaptchaWidgetId) return rej(new Error('reCAPTCHA no renderizado'));
-      
-      recaptchaResolve = res;
-      grecaptcha.execute(recaptchaWidgetId); // Dispara la verificación
+      grecaptcha.ready(()=>grecaptcha.execute(SITE_KEY,{action}).then(res).catch(rej));
     });
   }
-  // ------------------------------------
-
 
   // 1) EXISTE CORREO (respeta anti-enumeración y acción esperada)
   $('#btnStep1').addEventListener('click', async ()=>{
@@ -159,15 +121,8 @@ permalink: /eliminar-cuenta
     disable('#btnStep1', true); txt('#status1','Verificando correo…', true);
 
     try{
-      // 🔑 CAPTCHA V2: Ejecutamos el desafío (puede ser invisible o modal)
-      const captchaToken = await v2(); 
-      if (!captchaToken) {
-        txt('#status1','Verificación de seguridad fallida. Intenta de nuevo.', false);
-        return;
-      }
-      
-      // La acción 'pwd_recovery_check' en el backend ya no será verificada, 
-      // solo se valida que el token sea exitoso (V2).
+      // 👈 acción que tu backend espera para existencia
+      const captchaToken = await v3('pwd_recovery_check');
       const r1 = await fetch(`${API_BASE}/api/auth/existe-correo`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -194,14 +149,7 @@ permalink: /eliminar-cuenta
 
       // 2a) SOLICITAR OTP — acción: acc_delete_request
       txt('#status1','Enviando código…', true);
-      
-      // 🔑 CAPTCHA V2: Segundo desafío para evitar flooding
-      const captcha2 = await v2();
-      if (!captcha2) {
-        txt('#status1','Verificación de seguridad fallida. Intenta de nuevo.', false);
-        return;
-      }
-
+      const captcha2 = await v3('acc_delete_request'); // 👈 coincide con tu expectedAction
       const r2 = await fetch(`${API_BASE}/api/usuario/account/delete/otp/request`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -228,19 +176,13 @@ permalink: /eliminar-cuenta
     }
   });
 
-  // 2b) OTP VERIFY — acción: acc_delete_verify
+  // 2b) OTP VERIFY — acción: acc_delete_verify (backend la valida solo si CAPTCHA_ON_VERIFY==='true')
   $('#btnStep2').addEventListener('click', async ()=>{
     const codigo = $('#otp').value.trim();
     if(!codigo){ txt('#status2','Ingresa el código OTP.', false); return; }
     disable('#btnStep2', true); txt('#status2','Validando código…', true);
     try{
-      // 🔑 CAPTCHA V2: Tercer desafío
-      const captchaToken = await v2();
-      if (!captchaToken) {
-        txt('#status2','Verificación de seguridad fallida. Intenta de nuevo.', false);
-        return;
-      }
-
+      const captchaToken = await v3('acc_delete_verify'); // ok aunque backend no la exija siempre
       const resp = await fetch(`${API_BASE}/api/usuario/account/delete/otp/verify`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -274,20 +216,10 @@ permalink: /eliminar-cuenta
 
     disable('#btnStep3', true); txt('#status3','Confirmando…', true);
     try{
-      // 🔑 CAPTCHA V2: Cuarto desafío antes de la eliminación final
-      const captchaToken = await v2();
-      if (!captchaToken) {
-        txt('#status3','Verificación de seguridad fallida. Intenta de nuevo.', false);
-        return;
-      }
-      
       const resp = await fetch(`${API_BASE}/api/usuario/account/delete/confirm`,{
-        method:'POST', 
-        headers:{'Content-Type':'application/json'},
-        // 🔑 Enviamos el token V2 en la confirmación final
-        body: JSON.stringify({ ticket: ticketCache, captchaToken: captchaToken }) 
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ticket: ticketCache })
       });
-      
       let data = {};
       try { data = await resp.clone().json(); } catch { data = { raw: await resp.text().catch(()=>null) }; }
       console.log('CONFIRM status', resp.status, 'body', data);
