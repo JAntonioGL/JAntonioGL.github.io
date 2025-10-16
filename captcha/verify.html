@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>reCAPTCHA v2</title>
+
+    <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            /* Alineación vertical */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            /* Evitar scroll si la casilla es muy grande */
+        }
+
+        /* Estilo para el contenedor de la casilla */
+        #recaptcha-container {
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .legal {
+            font-size: 12px;
+            color: #555;
+            text-align: center;
+            max-width: 280px;
+            padding: 10px;
+        }
+
+        .legal a {
+            color: #555;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="recaptcha-container">
+        <div id="recaptcha-widget"></div>
+    </div>
+
+    <div class="legal">
+        Este sitio está protegido por reCAPTCHA y se aplican la
+        <a href="https://policies.google.com/privacy" target="_blank">Política de privacidad</a> y los
+        <a href="https://policies.google.com/terms" target="_blank">Términos de servicio</a> de Google.
+    </div>
+
+    <script>
+        var widgetId;
+        // 🚨 CLAVE FIJA: Coloca tu clave V2 aquí, en lugar de inyectarla con JS.
+        const siteKeyV2 = 'T6LeYo-wrAAAAAD_UZQoAiFdFxeIRHh-bITjcN0mh';
+
+        // --- NUEVAS FUNCIONES DE CALLBACK ---
+
+        // Llamado por reCAPTCHA cuando el usuario pasa la verificación
+        function onTokenReceived(token) {
+            // 🚨 Usa el handler que ya tienes para enviar el token a Flutter
+            if (typeof Captcha !== "undefined") {
+                Captcha.postMessage(token);
+            }
+            // Opcional: Deshabilita la casilla después de usarla (o espera la expiración)
+            // grecaptcha.reset(widgetId); 
+        }
+
+        // Llamado cuando el token expira (vuelve a aparecer la casilla)
+        function onTokenExpired() {
+            if (typeof Captcha !== "undefined") {
+                Captcha.postMessage(''); // Enviar cadena vacía para indicar expiración
+            }
+            grecaptcha.reset(widgetId);
+        }
+
+        // Función llamada cuando la API de reCAPTCHA V2 está lista
+        window.onRecaptchaLoad = function () {
+            console.log("reCAPTCHA V2 API cargada.");
+            // Si la clave V2 ya fue inyectada, renderiza inmediatamente
+            if (siteKeyV2) {
+                renderRecaptcha();
+            }
+        };
+
+        function renderRecaptcha() {
+            if (typeof grecaptcha !== "undefined" && siteKeyV2) {
+                widgetId = grecaptcha.render('recaptcha-widget', {
+                    'sitekey': siteKeyV2,
+                    'theme': 'light',
+                    'callback': onTokenReceived,
+                    'expired-callback': onTokenExpired
+                });
+            }
+        }
+
+
+        // --- ADAPTACIÓN DE LAS FUNCIONES DE FLUJO ---
+
+        // 🚨 Función que ahora INYECTA la clave V2 desde Flutter.
+        // Esto reemplaza a window.readyCaptcha y window.executeCaptcha
+        window.setSiteKeyAndRender = function (siteKey) {
+            siteKeyV2 = siteKey;
+
+            // Si la API ya cargó, renderiza el widget
+            if (typeof grecaptcha !== "undefined" && typeof grecaptcha.render !== "undefined") {
+                renderRecaptcha();
+            }
+            // Si no ha cargado, onRecaptchaLoad se encargará de renderizarlo cuando esté lista.
+        };
+
+        // El onLoad inicial sigue siendo útil para debugging
+        window.onload = function () {
+            console.log("HTML cargado");
+            // Opcional: Puedes llamar a window.setSiteKeyAndRender(siteKey) desde Flutter
+            // en el initState de tus pantallas, o en el onReady del WebView.
+        };
+
+        // **IMPORTANTE:** Elimina las funciones de inyección y ejecución de V3 que tenías.
+        // En Flutter, ahora solo llamas a `window.setSiteKeyAndRender(siteKeyV2)` una vez por pantalla.
+
+    </script>
+</body>
+
+</html>
