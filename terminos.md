@@ -1,9 +1,9 @@
 ---
 layout: default
-title: Términos y Condiciones de Uso — YoVerifico
-description: Acuerdo de Uso de la aplicación YoVerifico.
-section: uso
-permalink: /politicas-uso
+title: Términos y Condiciones — YoVerifico
+description: Términos y Condiciones de uso de la aplicación YoVerifico.
+section: terminos
+permalink: /terminos
 ---
 
 # Acuerdo de Uso de la Aplicación “YoVerifico”
