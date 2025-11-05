@@ -15,5 +15,3 @@ section: contacto
 - Correo: <a href="mailto:contacto@yoverifico.com.mx">contacto@yoverifico.com.mx</a>
 - Soporte: <a href="mailto:soporte@yoverifico.com.mx">soporte@yoverifico.com.mx</a>
 
-
-> Próximamente: formulario de contacto y página de eliminación de cuenta.
