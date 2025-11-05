@@ -18,7 +18,7 @@ Descarga la aplicación oficial y más reciente de YoVerifico. Es la única form
     <p class="muted" style="text-align: center;">Haz clic en el botón para ir directamente a la tienda oficial de Google Play.</p>
 
     <p style="text-align: center; margin-top: 1.5rem; margin-bottom: 1.5rem;">
-      <a href="TU_ENLACE_A_LA_PLAY_STORE" target="_blank" rel="noopener noreferrer">
+      <a href="https://play.google.com/store/apps/details?id=com.yoverifico.app" target="_blank" rel="noopener noreferrer">
         <img src="https://play.google.com/intl/en_us/badges/static/images/badges/es-419_badge_web_generic.png" 
              alt="Descárgalo en Google Play" 
              style="width: 220px;">
