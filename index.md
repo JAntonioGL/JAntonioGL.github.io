@@ -17,7 +17,10 @@ section: inicio
   }
   .carousel-slide {
     display: flex;
-    transition: transform 0.5s ease-in-out;
+    /* LA TRANSICIÓN AHORA SE MANEJA CON JS
+      para permitir el "salto" infinito.
+      Eliminamos 'transition' de aquí.
+    */
   }
   .carousel-image {
     width: 100%;
@@ -73,7 +76,7 @@ section: inicio
         <img class="carousel-image" src="{{ '/assets/img/6.jpeg' | relative_url }}" alt="Captura de pantalla de la app 6">
         <img class="carousel-image" src="{{ '/assets/img/7.jpeg' | relative_url }}" alt="Captura de pantalla de la app 7">
         <img class="carousel-image" src="{{ '/assets/img/8.jpeg' | relative_url }}" alt="Captura de pantalla de la app 8">
-      </div>
+        </div>
       
       <button class="carousel-btn prev-btn">&lt;</button>
       <button class="carousel-btn next-btn">&gt;</button>
@@ -113,69 +116,102 @@ section: inicio
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Busca el carrusel específico dentro de la sección "hero"
     const carouselContainer = document.querySelector('.hero .carousel-container');
-    if (!carouselContainer) return; // Si no lo encuentra, no hace nada
+    if (!carouselContainer) return;
 
     const slide = carouselContainer.querySelector('.carousel-slide');
-    const images = carouselContainer.querySelectorAll('.carousel-image');
     const prevBtn = carouselContainer.querySelector('.prev-btn');
     const nextBtn = carouselContainer.querySelector('.next-btn');
     
-    // Asegurarse de que todo existe antes de continuar
-    if (!slide || !images.length || !prevBtn || !nextBtn) return;
+    // Traer todas las imágenes originales
+    let images = carouselContainer.querySelectorAll('.carousel-image');
+    if (images.length === 0) return;
 
-    let currentIndex = 0;
+    // --- 1. CONFIGURACIÓN DEL LOOP INFINITO ---
+
+    // Clonar la primera y la última imagen
+    const firstImageClone = images[0].cloneNode(true);
+    const lastImageClone = images[images.length - 1].cloneNode(true);
+
+    // Añadir los clones al slide
+    slide.appendChild(firstImageClone);
+    slide.prepend(lastImageClone);
+
+    // Actualizar la lista de imágenes para incluir los clones
+    images = carouselContainer.querySelectorAll('.carousel-image');
     const imageCount = images.length;
+    
+    let currentIndex = 1; // Empezamos en la primera imagen *real* (índice 1)
     let autoPlayInterval;
+    let isAutoplayActive = true; // Controla si el autoplay debe estar encendido
 
-    // Función para mover el slide
-    function goToSlide(index) {
-      // Lógica para que el carrusel sea infinito (loop)
-      if (index < 0) {
-        index = imageCount - 1;
-      } else if (index >= imageCount) {
-        index = 0;
-      }
-      
-      // Mueve el contenedor de imágenes usando 'transform'
+    // Función para poner la transición CSS
+    function setTransition(enable = true) {
+      slide.style.transition = enable ? 'transform 0.5s ease-in-out' : 'none';
+    }
+
+    // Función para mover el slide a un índice
+    function goToSlide(index, withTransition = true) {
+      setTransition(withTransition);
       slide.style.transform = `translateX(-${index * 100}%)`;
       currentIndex = index;
     }
 
-    // Función para iniciar el autoplay
+    // Posición inicial (sin transición)
+    goToSlide(currentIndex, false);
+
+    // --- 2. LÓGICA DE AUTOPLAY Y NAVEGACIÓN ---
+
     function startAutoplay() {
-      // Cambia de imagen cada 4 segundos (4000 milisegundos)
+      if (!isAutoplayActive) return; // Si el usuario ya interactuó, no inicies
+      
       autoPlayInterval = setInterval(() => {
         goToSlide(currentIndex + 1);
-      }, 4000);
+      }, 4000); // Cambia cada 4 segundos
     }
 
-    // Función para detener el autoplay
     function stopAutoplay() {
       clearInterval(autoPlayInterval);
     }
 
-    // --- Event Listeners ---
-
     // Clic en Siguiente
     nextBtn.addEventListener('click', () => {
+      isAutoplayActive = false; // El usuario interactuó, desactiva autoplay
+      stopAutoplay();
       goToSlide(currentIndex + 1);
-      stopAutoplay(); // Detiene el autoplay al hacer clic manual
-      startAutoplay(); // Lo reinicia
     });
 
     // Clic en Anterior
     prevBtn.addEventListener('click', () => {
+      isAutoplayActive = false; // El usuario interactuó, desactiva autoplay
+      stopAutoplay();
       goToSlide(currentIndex - 1);
-      stopAutoplay(); // Detiene el autoplay
-      startAutoplay(); // Lo reinicia
     });
 
-    // Detener autoplay si el mouse está sobre el carrusel
+    // Pausar/Reanudar autoplay con el mouse (solo si sigue activo)
     carouselContainer.addEventListener('mouseenter', stopAutoplay);
-    // Reanudar autoplay cuando el mouse sale
-    carouselContainer.addEventListener('mouseleave', startAutoplay);
+    carouselContainer.addEventListener('mouseleave', () => {
+      if (isAutoplayActive) {
+        startAutoplay();
+      }
+    });
+
+    // --- 3. MANEJO DEL "SALTO" INFINITO ---
+    
+    // Este evento se dispara cuando la animación CSS termina
+    slide.addEventListener('transitionend', () => {
+      // Si estamos en el clon de la ÚLTIMA imagen (al principio)
+      if (currentIndex === 0) {
+        // Salta a la última imagen *real* sin animación
+        goToSlide(imageCount - 2, false); 
+      }
+      
+      // Si estamos en el clon de la PRIMERA imagen (al final)
+      if (currentIndex === imageCount - 1) {
+        // Salta a la primera imagen *real* sin animación
+        goToSlide(1, false); 
+      }
+    });
 
     // Iniciar el carrusel automáticamente
     startAutoplay();
