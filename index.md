@@ -30,9 +30,9 @@ section: inicio
         transition: transform 0.5s ease-in-out; /* Para futuras animaciones con JS */
       ">
         
-        <img class="carousel-image" src="{{ '/assets/img/1.png' | relative_url }}" alt="Captura de pantalla de la app 1" style="width: 100%; flex-shrink: 0; display: block;">
-        <img class="carousel-image" src="{{ '/assets/img/2.png' | relative_url }}" alt="Captura de pantalla de la app 2" style="width: 100%; flex-shrink: 0; display: block;">
-        <img class="carousel-image" src="{{ '/assets/img/3.png' | relative_url }}" alt="Captura de pantalla de la app 3" style="width: 100%; flex-shrink: 0; display: block;">
+        <img class="carousel-image" src="{{ '/assets/img/1.jpeg' | relative_url }}" alt="Captura de pantalla de la app 1" style="width: 100%; flex-shrink: 0; display: block;">
+        <img class="carousel-image" src="{{ '/assets/img/2.jpeg' | relative_url }}" alt="Captura de pantalla de la app 2" style="width: 100%; flex-shrink: 0; display: block;">
+        <img class="carousel-image" src="{{ '/assets/img/3.jpeg' | relative_url }}" alt="Captura de pantalla de la app 3" style="width: 100%; flex-shrink: 0; display: block;">
         
       </div>
     </div>
