@@ -68,11 +68,11 @@ section: inicio
         <img class="carousel-image" src="{{ '/assets/img/1.jpeg' | relative_url }}" alt="Captura de pantalla de la app 1">
         <img class="carousel-image" src="{{ '/assets/img/2.jpeg' | relative_url }}" alt="Captura de pantalla de la app 2">
         <img class="carousel-image" src="{{ '/assets/img/3.jpeg' | relative_url }}" alt="Captura de pantalla de la app 3">
-        <img class="carousel-image" src="{{ '/assets/img/3.jpeg' | relative_url }}" alt="Captura de pantalla de la app 4">
-        <img class="carousel-image" src="{{ '/assets/img/3.jpeg' | relative_url }}" alt="Captura de pantalla de la app 5">
-        <img class="carousel-image" src="{{ '/assets/img/3.jpeg' | relative_url }}" alt="Captura de pantalla de la app 6">
-        <img class="carousel-image" src="{{ '/assets/img/3.jpeg' | relative_url }}" alt="Captura de pantalla de la app 7">
-        <img class="carousel-image" src="{{ '/assets/img/3.jpeg' | relative_url }}" alt="Captura de pantalla de la app 8">
+        <img class="carousel-image" src="{{ '/assets/img/4.jpeg' | relative_url }}" alt="Captura de pantalla de la app 4">
+        <img class="carousel-image" src="{{ '/assets/img/5.jpeg' | relative_url }}" alt="Captura de pantalla de la app 5">
+        <img class="carousel-image" src="{{ '/assets/img/6.jpeg' | relative_url }}" alt="Captura de pantalla de la app 6">
+        <img class="carousel-image" src="{{ '/assets/img/7.jpeg' | relative_url }}" alt="Captura de pantalla de la app 7">
+        <img class="carousel-image" src="{{ '/assets/img/8.jpeg' | relative_url }}" alt="Captura de pantalla de la app 8">
       </div>
       
       <button class="carousel-btn prev-btn">&lt;</button>
