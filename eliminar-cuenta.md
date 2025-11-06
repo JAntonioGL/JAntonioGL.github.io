@@ -9,13 +9,20 @@ permalink: /eliminar-cuenta
 <style>
   .hide { display: none !important; }
   .ok{color:#0f766e}.err{color:#b91c1c}
+  
+  /* --- NUEVA REGLA: Evita la selección de la frase de confirmación --- */
+  #confirmPhrasePreview {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
 </style>
 
 <main class="container" style="max-width:760px">
   <h1>Eliminar cuenta y datos</h1>
-  <p class="muted">Plazo de atención: <strong>hasta 60 días hábiles</strong>. Por seguridad, verificaremos tu identidad con un código (OTP) y una confirmación escrita.</p>
+  <p class="muted">Plazo de atención: <strong>hasta 60 días hábiles</strong>. Por seguridad, verificaremos tu identidad con un <strong>código de seguridad</strong> que enviaremos a tu correo y una confirmación escrita.</p>
 
-  <!-- 1) EXISTE CORREO -->
   <section id="step1" class="card">
     <h2 style="margin-top:0">Paso 1 — Verifica tu correo</h2>
     <div class="field">
@@ -28,12 +35,11 @@ permalink: /eliminar-cuenta
     </div>
   </section>
 
-  <!-- 2) OTP -->
   <section id="step2" class="card hide">
-    <h2 style="margin-top:0">Paso 2 — Verifica el código</h2>
-    <p class="muted">Enviamos un código (OTP) a tu correo. Revisa tu bandeja.</p>
+    <h2 style="margin-top:0">Paso 2 — Ingresa el código de seguridad</h2>
+    <p class="muted">Te enviamos un <strong>código de seguridad</strong> a tu correo. Revisa tu bandeja de entrada (y la de spam, por si acaso).</p>
     <div class="field">
-      <label for="otp">Código recibido (OTP) <span style="color:red">*</span></label>
+      <label for="otp"><strong>Código de seguridad</strong> <span style="color:red">*</span></label>
       <input id="otp" type="text" inputmode="numeric" placeholder="Ingresa el código" />
     </div>
     <div class="actions">
@@ -42,10 +48,10 @@ permalink: /eliminar-cuenta
     </div>
   </section>
 
-  <!-- 3) CONFIRMACIÓN -->
   <section id="step3" class="card hide">
     <h2 style="margin-top:0">Paso 3 — Confirmación final</h2>
-    <p>Escribe exactamente la siguiente frase para confirmar:</p>
+    <p>Para confirmar que eres tú y que entiendes esta acción, <strong>escribe exactamente la siguiente frase</strong> en el campo de abajo. <strong>(No se puede copiar y pegar)</strong>:</p>
+    
     <p class="helper" id="confirmPhrasePreview" style="background:#F1F5F9;border:1px solid #E5E7EB;padding:8px;border-radius:8px"></p>
 
     <div class="field">
@@ -55,7 +61,7 @@ permalink: /eliminar-cuenta
 
     <div class="field">
       <input id="consent" type="checkbox" />
-      <label for="consent">Confirmo que deseo eliminar de forma permanente mi cuenta y datos asociados.</label>
+      <label for="consent"><strong>Entiendo y confirmo</strong> que deseo eliminar de forma permanente mi cuenta y todos mis datos asociados (vehículos, historiales, etc.).</label>
     </div>
 
     <div class="actions">
@@ -64,9 +70,8 @@ permalink: /eliminar-cuenta
     </div>
   </section>
 
-  <!-- DONE -->
   <section id="done" class="card hide">
-    <h2 style="margin-top:0">Listo</h2>
+    <h2 style="margin-top:0">Solicitud completada</h2>
     <p class="ok"><strong>Tu cuenta ha sido eliminada satisfactoriamente.</strong></p>
     <p class="legal">
       Conservaremos registros mínimos y desasociados por motivos de seguridad/cumplimiento, conforme a nuestro
@@ -90,7 +95,6 @@ permalink: /eliminar-cuenta
   </section>
 </main>
 
-<!-- reCAPTCHA v3 (usa tu site key) -->
 <script src="https://www.google.com/recaptcha/api.js?render=6LcvdqUrAAAAAPBzAezZd6KpGqdEPzYdmB02GWpl"></script>
 
 <script>
@@ -179,7 +183,10 @@ permalink: /eliminar-cuenta
   // 2b) OTP VERIFY — acción: acc_delete_verify (backend la valida solo si CAPTCHA_ON_VERIFY==='true')
   $('#btnStep2').addEventListener('click', async ()=>{
     const codigo = $('#otp').value.trim();
-    if(!codigo){ txt('#status2','Ingresa el código OTP.', false); return; }
+    
+    // --- CAMBIO DE TEXTO DE "OTP" A LENGUAJE NATURAL ---
+    if(!codigo){ txt('#status2','Ingresa el código que recibiste.', false); return; }
+    
     disable('#btnStep2', true); txt('#status2','Validando código…', true);
     try{
       const captchaToken = await v3('acc_delete_verify'); // ok aunque backend no la exija siempre
@@ -211,7 +218,10 @@ permalink: /eliminar-cuenta
     const must = phraseFor(correoCache);
     const phrase = $('#confirmPhrase').value.trim();
     if(phrase !== must){ txt('#status3','La frase no coincide exactamente.', false); return; }
-    if(!$('#consent').checked){ txt('#status3','Debes marcar el consentimiento.', false); return; }
+    
+    // --- CAMBIO DE TEXTO DE CONSENTIMIENTO ---
+    if(!$('#consent').checked){ txt('#status3','Debes confirmar que entiendes la acción.', false); return; }
+    
     if(!ticketCache){ txt('#status3','No hay ticket válido.', false); return; }
 
     disable('#btnStep3', true); txt('#status3','Confirmando…', true);
