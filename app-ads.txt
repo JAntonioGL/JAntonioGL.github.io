@@ -1,0 +1,2 @@
+google.com, pub-8247121041006363, DIRECT, f08c47fec0942fa0
+facebook.com, 3022345184821722, RESELLER, c3e20eee3f780d68
