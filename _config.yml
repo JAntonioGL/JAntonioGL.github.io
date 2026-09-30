@@ -20,3 +20,5 @@ nav:
   - name: "Contacto"
     url: "/contacto"
     section: contacto
+plugins:
+  - jekyll-seo-tag
