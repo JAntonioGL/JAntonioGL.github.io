@@ -7,7 +7,7 @@ permalink: /politicas-uso
 ---
 
 # Acuerdo de Uso de la Aplicación “YoVerifico”
-**Última actualización:** 5 de noviembre de 2025
+**Última actualización:** 27 de octubre de 2026
 
 Este documento establece los **Términos y Condiciones de Uso** (en adelante, el “**Acuerdo**”) que regulan el acceso y uso de la aplicación móvil **YoVerifico** (en adelante, la “**Aplicación**”), desarrollada y operada por su titular (en adelante, el “**Titular**” o “**Nosotros**”).
 
@@ -20,16 +20,19 @@ La Aplicación proporciona **información estimada** y **recordatorios calculado
 
 Con esta base, **YoVerifico** ayuda al Usuario a **planificar sus periodos de verificación** y a **prevenir posibles multas por verificación extemporánea**. La Aplicación también incluye información general sobre **requisitos oficiales**, **vínculos a verificentros**, **consulta de adeudos**, **pago de verificaciones extemporáneas** y un **navegador interno** para facilitar el acceso a plataformas oficiales.
 
+**Deslinde explícito sobre multas y sanciones:** El uso de **YoVerifico** (tanto en su versión gratuita como en cualquiera de sus planes de suscripción) **no exime al Usuario de sus obligaciones legales** como propietario o conductor de un vehículo, ni garantiza de forma absoluta que no sea acreedor a infracciones. **El Titular no se hace responsable, bajo ninguna circunstancia, del pago, reembolso o compensación por multas de tránsito, recargos por verificación extemporánea, sanciones por contingencias ambientales (Hoy No Circula) o costos de arrastre y depósito vehicular (corralón)** en los que pudiera incurrir el Usuario.
+
 ## 2. Naturaleza y Limitación de Responsabilidad
 **YoVerifico** es una aplicación **no oficial**, **independiente**, **sin fines políticos, partidistas ni mediáticos**, y **no vinculada** a ninguna institución gubernamental o privada.
 
 La información de la Aplicación es **informativa y de apoyo**; **no sustituye** ni representa herramientas, constancias o medios **oficiales**. El Usuario comprende y acepta que:
-- La información puede diferir de la publicada por autoridades competentes.
+- La información puede diferir de la publicada por autoridades competentes o sufrir retrasos frente a avisos extraordinarios de última hora.
 - La Aplicación **no garantiza** evitar multas, sanciones o verificaciones extemporáneas.
-- El uso e interpretación de la información son **responsabilidad exclusiva del Usuario**.
+- La recepción oportuna de alertas y recordatorios depende de la configuración del dispositivo del Usuario (permisos de notificaciones, ahorro de batería y conexión a internet) y de la exactitud de los datos que él mismo haya registrado.
+- El uso, verificación final en portales gubernamentales e interpretación de la información son **responsabilidad exclusiva del Usuario**.
 - No se garantiza **disponibilidad continua**, **precisión absoluta** ni **actualización permanente** de datos, enlaces o servicios.
 
-El Titular **no será responsable** por daños directos o indirectos, pérdidas o perjuicios derivados del uso o dependencia de la Aplicación, ni por **fallas técnicas**, **errores humanos**, **inexactitudes** o **interrupciones** del servicio.
+El Titular **no será responsable** por daños directos o indirectos, pérdidas económicas o perjuicios derivados del uso o dependencia de la Aplicación, ni por **fallas técnicas**, **retrasos en notificaciones push**, **errores humanos**, **inexactitudes** o **interrupciones** del servicio.
 
 ## 3. Cuentas, Registro y Seguridad
 Al crear una cuenta, el Usuario se compromete a:
@@ -51,12 +54,25 @@ El Usuario se compromete a utilizar la Aplicación de acuerdo con la ley y este 
 
 El incumplimiento de estas obligaciones facultará al Titular para suspender o cancelar la cuenta del Usuario y tomar las acciones legales correspondientes.
 
-## 5. Suscripciones, Planes y Pagos
+## 5. Suscripciones, Planes, Prorrateo y Promociones
 **YoVerifico** puede ofrecer funciones gratuitas y planes de suscripción de pago (por ejemplo, **Free, Colaborador, Plus, Flotilla, Enterprise**).
 
 Al adquirir un plan, el Usuario acepta los términos de **Google Play Store** o **App Store**. Estos terceros gestionan todo el proceso de pago, incluyendo renovaciones, cancelaciones y reembolsos, de acuerdo con sus propias políticas. El Titular **no** recibe datos bancarios ni financieros.
 
 **El Titular no procesa pagos directamente ni ofrece reembolsos por las suscripciones; cualquier solicitud de reembolso debe dirigirse a la tienda de aplicaciones correspondiente.** El Titular podrá **modificar precios y características** de los planes con aviso oportuno.
+
+### 5.1. Cambios de Plan (Upgrades) y Prorrateo
+La Aplicación permite únicamente la actualización hacia planes de nivel superior (*upgrades*), bloqueando el cambio directo hacia planes inferiores mientras exista una suscripción activa. 
+- **Condición de aplicación:** El ajuste por prorrateo aplica **exclusivamente** cuando la suscripción activa actual y la nueva suscripción se gestionan a través de **Google Play Store** utilizando la **misma cuenta de Google**.
+- **Mecánica de cobro y vigencia:** Al mejorar de plan, el cobro del nuevo plan se efectúa de manera inmediata conforme a las reglas de prorrateo de Google Play. Los beneficios del nuevo plan se activan al instante, sumando o ajustando el tiempo restante del plan anterior al nuevo periodo contratado.
+
+### 5.2. Cupones y Códigos Promocionales
+El Titular podrá emitir códigos promocionales o cupones sujetos a las políticas de **Google Play Store** y a las reglas internas de validación del sistema de **YoVerifico**:
+- **Elegibilidad y Medios Oficiales:** El Titular determina desde su sistema qué cuentas o Usuarios son elegibles para cada promoción. Las condiciones particulares de cada cupón (vigencia, porcentaje o beneficio, planes participantes y compatibilidad con otras ofertas) se especificarán siempre en el medio oficial de distribución (dentro de la interfaz de la Aplicación o vía correo electrónico oficial).
+- **Alcance (Nuevas Suscripciones y Upgrades):** Los cupones aplican exclusivamente para la contratación inicial de un plan o para la mejora a un plan superior (*upgrade*). **No aplican** para renovaciones automáticas ni para cambios a planes de menor nivel.
+- **Modalidades y Límite de Uso:** Todos los cupones son de naturaleza individual y de **un solo uso** por Usuario y por plan de suscripción. Pueden emitirse como códigos de campaña (ej. temporadas promocionales, limitados a una redención por cuenta elegible) o como códigos únicos globales que se invalidan tras su primer canje general.
+- **Compatibilidad:** Salvo que las condiciones particulares del cupón indiquen expresamente lo contrario en su pantalla o correo de entrega, los cupones **no son acumulables** entre sí ni compatibles con otras ofertas o promociones previamente utilizadas por el Usuario.
+- **Restricciones:** Los cupones no son transferibles ni canjeables por dinero en efectivo. El Titular se reserva el derecho de desactivar o rechazar cualquier cupón en caso de vencimiento, agotamiento de existencias, error técnico o indicios de uso fraudulento.
 
 ## 6. Publicidad, Enlaces y Contenidos de Terceros
 La Aplicación puede mostrar **anuncios** o **enlaces externos**. Tales recursos son ajenos al control del Titular. El Titular **no asume responsabilidad** por su contenido, políticas o disponibilidad. El acceso se realiza **bajo criterio del Usuario**, quien debe revisar los términos de cada sitio.
@@ -69,8 +85,10 @@ Cualquier uso no autorizado (reproducción, modificación, distribución o explo
 ## 8. Privacidad y Protección de Datos Personales
 El tratamiento de datos personales se rige por el **Aviso de Privacidad** de **YoVerifico**, disponible en la Aplicación y en el sitio web oficial. El Usuario declara haberlo **leído y aceptado** antes de proporcionar información personal.
 
-## 9. Modificaciones del Acuerdo
-El Titular podrá **modificar** este Acuerdo en cualquier momento. Las actualizaciones se publicarán en la Aplicación y/o en el sitio web con la **fecha de revisión**. El uso continuado tras la publicación implica **aceptación** de los nuevos términos.
+## 9. Modificaciones del Acuerdo y Versión Prevaleciente
+El Titular podrá **modificar** este Acuerdo en cualquier momento. Las actualizaciones entrarán en vigor desde su publicación en el sitio web oficial con la nueva **fecha de revisión**. 
+
+Por razones técnicas o de caché en versiones anteriores de la Aplicación, el texto mostrado dentro de la interfaz móvil podría presentar algún desfase respecto a la versión más reciente. El Usuario reconoce y acepta que **la versión oficial, vigente y legalmente vinculante de este Acuerdo será siempre la publicada en `https://yoverifico.com.mx/politicas-uso` (o `https://yoverifico.com.mx/terminos`)**, la cual prevalecerá sobre cualquier copia local o versión previa integrada en la Aplicación. El uso continuado del servicio tras la publicación de cambios implica la **aceptación** de los nuevos términos.
 
 ## 10. Suspensión o Terminación del Servicio
 El Titular podrá **suspender o terminar** la Aplicación total o parcialmente, sin previo aviso, por causas técnicas, legales o de mantenimiento. El Usuario puede dejar de usar la Aplicación en cualquier momento, sin obligación de reembolso por parte del Titular, salvo lo previsto por las políticas de las tiendas oficiales.
